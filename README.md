@@ -1,6 +1,6 @@
 # Portfolio Website
 
-This is my per### `npm run deploy`
+This is my portfolio website ### `npm run deploy`
 
 Builds the app and deploys it to GitHub Pages.
 
