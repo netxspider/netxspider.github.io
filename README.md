@@ -1,6 +1,18 @@
-# Getting Started with Create React App
+# Portfolio Website
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This is my per### `npm run deploy`
+
+Builds the app and deploys it to GitHub Pages.
+
+### `npm run eject`
+
+**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+
+If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.tfolio website built with React and TypeScript. The project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+
+## Live Site
+
+Visit the live site at: [https://netxspider.github.io](https://netxspider.github.io)
 
 ## Available Scripts
 
