@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, Suspense, lazy } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import Lanyard from './ui/Lanyard';
 import ScrollBlurFade from './ui/ScrollBlurFade';
 import ParallaxMotion from './ui/ParallaxMotion';
 import { playHoverSound } from '../utils/soundEffects';
 import { useLanguage } from '../context/LanguageContext';
+
+const Lanyard = lazy(() => import('./ui/Lanyard'));
 
 const AboutSection: React.FC = () => {
   const { t } = useLanguage();
@@ -60,17 +61,28 @@ const AboutSection: React.FC = () => {
 
                 {/* The 3D Lanyard Component - Enlarged via camera distance and cardScale */}
                 <div className="w-full h-full flex items-center justify-center">
-                  <Lanyard
-                    position={[0, 0, 15]}
-                    gravity={[0, -40, 0]}
-                    fov={20}
-                    transparent={true}
-                    frontImage="/arnav-id.jpg"
-                    backImage="/hero-mask.jpg"
-                    imageFit="cover"
-                    cardScale={2.7}
-                    lanyardWidth={1}
-                  />
+                  <Suspense
+                    fallback={
+                      <div className="w-full h-full flex flex-col items-center justify-center gap-3">
+                        <div className="w-8 h-8 rounded-full border-2 border-white/20 border-t-white animate-spin" />
+                        <span className="text-[10px] font-mono-tech text-neutral-500 uppercase tracking-widest">
+                          Loading 3D Card
+                        </span>
+                      </div>
+                    }
+                  >
+                    <Lanyard
+                      position={[0, 0, 15]}
+                      gravity={[0, -40, 0]}
+                      fov={20}
+                      transparent={true}
+                      frontImage="/arnav-id.jpg"
+                      backImage="/hero-mask.png"
+                      imageFit="cover"
+                      cardScale={2.7}
+                      lanyardWidth={1}
+                    />
+                  </Suspense>
                 </div>
 
                 {/* Bottom Subtle Barcode / Tech Detail */}
