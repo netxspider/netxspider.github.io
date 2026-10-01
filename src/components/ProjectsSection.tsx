@@ -244,16 +244,15 @@ const ProjectsSection: React.FC = () => {
   useEffect(() => {
     const handleResize = () => {
       const w = window.innerWidth;
-      const h = window.innerHeight;
       let targetWidth = 580;
       let targetHeight = 362;
       if (w < 640) {
-        targetWidth = Math.min(w - 32, 340);
-        // Portrait proportion for mobile so all back card content fits comfortably
-        targetHeight = Math.min(Math.max(420, h - 220), 470);
+        // Natural landscape widescreen proportion matching project screenshots
+        targetWidth = Math.min(w - 32, 360);
+        targetHeight = Math.round(targetWidth * 0.65);
       } else if (w < 1024) {
-        targetWidth = Math.min(w - 48, 460);
-        targetHeight = Math.min(Math.round(targetWidth * 0.75), 430);
+        targetWidth = Math.min(w - 48, 480);
+        targetHeight = Math.round(targetWidth * 0.625);
       } else if (w < 1440) {
         targetWidth = 560;
         targetHeight = Math.round(targetWidth * 0.625);
@@ -591,24 +590,24 @@ const ProjectsSection: React.FC = () => {
                   shadowColor="#000000"
                   shadowOpacity={0.6}
                   ariaLabel={`Project ${titleText}`}
-                  /* FRONT FACE: Absolute pure poster without any overlays or text. Black & White by default, Original color on hover */
+                  /* FRONT FACE: Absolute pure poster without any overlays or text. Colorful on mobile by default, Black & White on desktop with color on hover */
                   front={
                     <div className="relative w-full h-full overflow-hidden rounded-[20px] bg-neutral-950 group">
                       <img
                         src={project.image}
                         alt={titleText}
                         loading="lazy"
-                        className="w-full h-full object-cover object-top transition-all duration-700 ease-out grayscale contrast-125 brightness-90 group-hover:grayscale-0 group-hover:contrast-100 group-hover:brightness-100"
+                        className="w-full h-full object-cover object-top transition-all duration-700 ease-out md:grayscale md:contrast-125 md:brightness-90 md:group-hover:grayscale-0 md:group-hover:contrast-100 md:group-hover:brightness-100"
                       />
                     </div>
                   }
                   /* BACK FACE: Detailed specification, tags, highlights & interactive GitHub / Live Demo links */
                   back={
-                    <div className="relative w-full h-full rounded-[20px] bg-neutral-950/95 border border-white/20 p-4 sm:p-6 md:p-7 flex flex-col justify-between overflow-y-auto backdrop-blur-xl">
+                    <div className="relative w-full h-full rounded-[20px] bg-neutral-950/95 border border-white/20 p-3.5 sm:p-6 md:p-7 flex flex-col justify-between overflow-y-auto backdrop-blur-xl">
                       {/* Top Header */}
                       <div>
-                        <div className="flex items-center justify-between gap-3 mb-1.5 sm:mb-2">
-                          <span className="font-mono-tech text-[9px] sm:text-[10px] text-neutral-400 uppercase tracking-widest px-2.5 py-0.5 rounded-full bg-white/10 border border-white/15">
+                        <div className="flex items-center justify-between gap-2 sm:gap-3 mb-1 sm:mb-2">
+                          <span className="font-mono-tech text-[9px] sm:text-[10px] text-neutral-400 uppercase tracking-widest px-2 sm:px-2.5 py-0.5 rounded-full bg-white/10 border border-white/15">
                             {categoryText}
                           </span>
                           <span className="font-mono-tech text-[9px] sm:text-[10px] text-neutral-400">
@@ -616,24 +615,24 @@ const ProjectsSection: React.FC = () => {
                           </span>
                         </div>
 
-                        <h4 className="font-display text-lg sm:text-2xl font-extrabold text-white tracking-tight">
+                        <h4 className="font-display text-base sm:text-2xl font-extrabold text-white tracking-tight line-clamp-1 sm:line-clamp-none">
                           {titleText}
                         </h4>
 
-                        <p className="font-mono-tech text-[11px] sm:text-xs text-neutral-300 mt-1 line-clamp-1">
+                        <p className="font-mono-tech text-[10px] sm:text-xs text-neutral-300 mt-0.5 sm:mt-1 line-clamp-1">
                           {taglineText}
                         </p>
 
-                        <p className="font-mono-tech text-[11px] sm:text-sm text-neutral-300 leading-relaxed mt-2 sm:mt-3 line-clamp-3 sm:line-clamp-4">
+                        <p className="font-mono-tech text-[10px] sm:text-sm text-neutral-300 leading-relaxed mt-1.5 sm:mt-3 line-clamp-2 sm:line-clamp-4">
                           {descText}
                         </p>
 
                         {/* Tech Stack Pills */}
-                        <div className="flex flex-wrap gap-1 sm:gap-1.5 mt-3 sm:mt-4">
+                        <div className="flex flex-wrap gap-1 sm:gap-1.5 mt-2 sm:mt-4">
                           {project.technologies.slice(0, 6).map((tech) => (
                             <span
                               key={tech}
-                              className="font-mono-tech text-[9px] sm:text-[11px] px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-md bg-white/5 border border-white/10 text-neutral-200"
+                              className="font-mono-tech text-[8px] sm:text-[11px] px-1.5 py-0.5 sm:px-2.5 sm:py-1 rounded-md bg-white/5 border border-white/10 text-neutral-200"
                             >
                               {tech}
                             </span>
@@ -642,7 +641,7 @@ const ProjectsSection: React.FC = () => {
                       </div>
 
                       {/* Bottom Action Links */}
-                      <div className="pt-3 sm:pt-4 border-t border-white/10 flex items-center gap-2 sm:gap-3 mt-3 sm:mt-4">
+                      <div className="pt-2 sm:pt-4 border-t border-white/10 flex items-center gap-2 sm:gap-3 mt-2 sm:mt-4">
                         {/* GitHub Button */}
                         {project.githubUrl ? (
                           <a

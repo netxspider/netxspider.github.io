@@ -12,8 +12,24 @@ interface Particle {
 }
 
 const STORAGE_KEY = 'netxspider_site_likes_count';
-const SESSION_LIKED_KEY = 'netxspider_liked_session';
+const DEVICE_LIKED_KEY = 'netxspider_liked_device';
+const DEVICE_ID_KEY = 'netxspider_device_id';
 const DEFAULT_INITIAL_LIKES = 0;
+
+// Persistent unique device identifier (indefinite per device)
+const getDeviceId = (): string => {
+  if (typeof window === 'undefined') return '';
+  try {
+    let id = localStorage.getItem(DEVICE_ID_KEY);
+    if (!id) {
+      id = 'dev_' + Math.random().toString(36).substring(2, 12) + '_' + Date.now().toString(36);
+      localStorage.setItem(DEVICE_ID_KEY, id);
+    }
+    return id;
+  } catch {
+    return 'device_fallback';
+  }
+};
 
 export const LikeHeartButton: React.FC = () => {
   const { t } = useLanguage();
@@ -26,7 +42,10 @@ export const LikeHeartButton: React.FC = () => {
   const [isLiked, setIsLiked] = useState<boolean>(() => {
     if (typeof window === 'undefined') return false;
     try {
-      return sessionStorage.getItem(SESSION_LIKED_KEY) === 'true';
+      return (
+        localStorage.getItem(DEVICE_LIKED_KEY) === 'true' ||
+        sessionStorage.getItem('netxspider_liked_session') === 'true'
+      );
     } catch {
       return false;
     }
@@ -96,48 +115,75 @@ export const LikeHeartButton: React.FC = () => {
     };
   }, []);
 
-  // Sync with Vercel Serverless API if deployed
+  // Live real-time sync with global likes endpoint across all users
   useEffect(() => {
     let isMounted = true;
-    fetch('/api/likes')
-      .then((res) => {
-        if (res.ok) return res.json();
-        throw new Error('Not available');
+
+    const fetchLiveLikes = () => {
+      fetch('/api/likes', {
+        headers: { 'Cache-Control': 'no-cache' },
       })
-      .then((data) => {
-        if (isMounted && data && typeof data.count === 'number' && data.count >= DEFAULT_INITIAL_LIKES) {
-          setLikes(data.count);
-          localStorage.setItem(STORAGE_KEY, data.count.toString());
-        }
-      })
-      .catch(() => {
-        // Fallback to local storage
-      });
+        .then((res) => {
+          if (res.ok) return res.json();
+          throw new Error('Not available');
+        })
+        .then((data) => {
+          if (isMounted && data && typeof data.count === 'number' && data.count >= DEFAULT_INITIAL_LIKES) {
+            setLikes(data.count);
+            localStorage.setItem(STORAGE_KEY, data.count.toString());
+          }
+        })
+        .catch(() => {
+          // Fallback to local storage
+        });
+    };
+
+    // 1. Initial fetch on mount
+    fetchLiveLikes();
+
+    // 2. Live poll every 10 seconds for real-time count updates from other users
+    const pollInterval = setInterval(fetchLiveLikes, 10000);
+
+    // 3. Immediately re-fetch whenever user switches back to this tab
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        fetchLiveLikes();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    window.addEventListener('focus', fetchLiveLikes);
 
     return () => {
       isMounted = false;
+      clearInterval(pollInterval);
+      document.removeEventListener('visibilitychange', handleVisibility);
+      window.removeEventListener('focus', fetchLiveLikes);
     };
   }, []);
 
   const handleLike = () => {
-    // Check if already liked in this session period
+    // Check if this device has already liked
     const alreadyLiked = (() => {
       try {
-        return sessionStorage.getItem(SESSION_LIKED_KEY) === 'true';
+        return (
+          localStorage.getItem(DEVICE_LIKED_KEY) === 'true' ||
+          sessionStorage.getItem('netxspider_liked_session') === 'true'
+        );
       } catch {
         return false;
       }
     })();
 
     if (alreadyLiked || isLiked) {
-      // User is allowed to like only once per session period
+      // User is allowed to like only once per device
       playTactileAudio('tick');
       return;
     }
 
-    // Set session flag immediately
+    // Set persistent device flag indefinitely
     try {
-      sessionStorage.setItem(SESSION_LIKED_KEY, 'true');
+      localStorage.setItem(DEVICE_LIKED_KEY, 'true');
+      sessionStorage.setItem('netxspider_liked_session', 'true');
     } catch {
       // ignore
     }
@@ -153,11 +199,24 @@ export const LikeHeartButton: React.FC = () => {
       // ignore
     }
 
-    // Ping Vercel Serverless API in background
+    // Ping global likes API with persistent device identifier
+    const deviceId = getDeviceId();
     fetch('/api/likes', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-    }).catch(() => {});
+      body: JSON.stringify({ deviceId }),
+    })
+      .then((res) => {
+        if (res.ok) return res.json();
+        throw new Error('POST failed');
+      })
+      .then((data) => {
+        if (data && typeof data.count === 'number') {
+          setLikes(data.count);
+          localStorage.setItem(STORAGE_KEY, data.count.toString());
+        }
+      })
+      .catch(() => {});
 
     // Trigger "+1" float indicator
     setShowPlusOne(true);

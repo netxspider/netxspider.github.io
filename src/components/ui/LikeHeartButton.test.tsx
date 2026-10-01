@@ -29,7 +29,7 @@ describe('LikeHeartButton', () => {
     expect(screen.getByText('+1')).toBeInTheDocument();
   });
 
-  test('restricts user to liking once per session period', () => {
+  test('restricts user to liking once per device', () => {
     render(
       <LanguageProvider>
         <LikeHeartButton />
@@ -41,8 +41,9 @@ describe('LikeHeartButton', () => {
     // First click increments
     fireEvent.click(likeBtn);
     expect(screen.getByText('1')).toBeInTheDocument();
+    expect(localStorage.getItem('netxspider_liked_device')).toBe('true');
 
-    // Second click in same session period does not increment again
+    // Second click on the same device does not increment again
     fireEvent.click(likeBtn);
     expect(screen.getByText('1')).toBeInTheDocument();
     expect(screen.queryByText('2')).not.toBeInTheDocument();

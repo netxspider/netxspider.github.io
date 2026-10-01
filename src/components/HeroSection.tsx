@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, Variants } from 'framer-motion';
 import HoverMaskReveal from './ui/HoverMaskReveal';
 import { playHoverSound } from '../utils/soundEffects';
@@ -32,6 +32,29 @@ const getFormattedDateTime = () => {
   return `${year}.${month}.${day} // ${hours}:${minutes}:${seconds}:${ms}`;
 };
 
+const LiveSystemTime: React.FC = () => {
+  const spanRef = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    let animId: number;
+    let lastTime = 0;
+    const updateTime = (timestamp: number) => {
+      if (timestamp - lastTime >= 100) {
+        lastTime = timestamp;
+        if (spanRef.current) {
+          spanRef.current.textContent = getFormattedDateTime();
+        }
+      }
+      animId = requestAnimationFrame(updateTime);
+    };
+
+    animId = requestAnimationFrame(updateTime);
+    return () => cancelAnimationFrame(animId);
+  }, []);
+
+  return <span ref={spanRef} className="text-neutral-200">{getFormattedDateTime()}</span>;
+};
+
 const HeroSection: React.FC = () => {
   const { t } = useLanguage();
   // Typewriter state for titles
@@ -39,20 +62,6 @@ const HeroSection: React.FC = () => {
   const [titleIndex, setTitleIndex] = useState(0);
   const [displayText, setDisplayText] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
-
-  // Live futuristic date & time state with real-time milliseconds (initialized on load)
-  const [currentDateTime, setCurrentDateTime] = useState<string>(getFormattedDateTime);
-
-  useEffect(() => {
-    let animId: number;
-    const updateTime = () => {
-      setCurrentDateTime(getFormattedDateTime());
-      animId = requestAnimationFrame(updateTime);
-    };
-
-    animId = requestAnimationFrame(updateTime);
-    return () => cancelAnimationFrame(animId);
-  }, []);
 
   // Typewriter effect
   useEffect(() => {
@@ -364,7 +373,7 @@ const HeroSection: React.FC = () => {
           <div className="flex items-center gap-2 font-mono-tech text-[10px] sm:text-[11px] text-neutral-400 tabular-nums tracking-wider select-none">
             <span className="w-1.5 h-1.5 rounded-full bg-cyan-400/80 animate-pulse" />
             <span className="text-white/40 uppercase">{t.hero.liveTime}</span>
-            <span className="text-neutral-200">{currentDateTime}</span>
+            <LiveSystemTime />
           </div>
         </div>
       </div>

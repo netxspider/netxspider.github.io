@@ -67,6 +67,8 @@ export default function Lanyard({
   cardScale = 2.6,
   className = ''
 }: LanyardProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [isInView, setIsInView] = useState(true);
   const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768);
 
   useEffect(() => {
@@ -75,17 +77,33 @@ export default function Lanyard({
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el || typeof IntersectionObserver === 'undefined') return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsInView(entry.isIntersecting);
+      },
+      { rootMargin: '120px' }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   const effectivePosition: [number, number, number] = isMobile
     ? [position[0], position[1], Math.max(position[2], 19)]
     : position;
   const effectiveCardScale = isMobile ? Math.min(cardScale, 2.05) : cardScale;
 
   return (
-    <div className={`lanyard-wrapper ${className}`}>
+    <div ref={containerRef} className={`lanyard-wrapper ${className}`}>
       <Canvas
         camera={{ position: effectivePosition, fov: fov }}
         dpr={[1, isMobile ? 1.5 : 2]}
-        gl={{ alpha: transparent }}
+        gl={{ alpha: transparent, powerPreference: 'high-performance' }}
+        frameloop={isInView ? 'always' : 'never'}
         onCreated={({ gl }: any) => gl.setClearColor(new THREE.Color(0x000000), transparent ? 0 : 1)}
       >
         <ambientLight intensity={Math.PI} />
