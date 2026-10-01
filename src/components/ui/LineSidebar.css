@@ -1,0 +1,132 @@
+.line-sidebar {
+  --accent-color: #ffffff;
+  --text-color: #888888;
+  --marker-color: #444444;
+  --marker-length: 45px;
+  --marker-gap: 8px;
+  --tick-scale: 0.5;
+  --max-shift: 20px;
+  --item-gap: 16px;
+  --font-size: 0.95rem;
+  --smoothing: 100ms;
+
+  position: relative;
+  display: flex;
+  justify-content: flex-start;
+  width: 100%;
+}
+
+.line-sidebar__item[aria-current="true"] .line-sidebar__label,
+.line-sidebar__item[aria-current="true"] .line-sidebar__text,
+.line-sidebar__item[aria-current="true"] .line-sidebar__index {
+  color: var(--accent-color);
+  font-weight: 700;
+}
+
+.line-sidebar__item[aria-current="true"] .line-sidebar__marker {
+  background-color: var(--accent-color);
+  opacity: 1;
+}
+
+html.light .line-sidebar {
+  --accent-color: #09090b !important;
+  --text-color: #71717a !important;
+  --marker-color: #a1a1aa !important;
+}
+
+html.light .line-sidebar__label {
+  color: color-mix(in srgb, #09090b calc(var(--effect, 0) * 100%), #71717a) !important;
+}
+
+html.light .line-sidebar__item[aria-current="true"] .line-sidebar__label,
+html.light .line-sidebar__item[aria-current="true"] .line-sidebar__text,
+html.light .line-sidebar__item[aria-current="true"] .line-sidebar__index {
+  color: #09090b !important;
+  font-weight: 700 !important;
+}
+
+html.light .line-sidebar__item[aria-current="true"] .line-sidebar__marker {
+  background-color: #09090b !important;
+  opacity: 1 !important;
+}
+
+
+.line-sidebar--markers {
+  padding-left: calc(var(--marker-length) + var(--marker-gap));
+}
+
+.line-sidebar__list {
+  list-style: none;
+  margin: 0;
+  padding: 0.5rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--item-gap);
+  width: 100%;
+}
+
+/* --effect (0..1) is driven per item by a rAF lerp in JS, so every derived
+   property below reads the same continuously-animating value and stays in
+   step, with no CSS transitions to stagger. */
+.line-sidebar__item {
+  position: relative;
+  cursor: pointer;
+}
+
+/* Widen the pointer target so items react a touch before the cursor arrives */
+.line-sidebar__item::before {
+  content: '';
+  position: absolute;
+  inset: -6px -24px;
+}
+
+.line-sidebar__label {
+  position: relative;
+  display: inline-flex;
+  align-items: baseline;
+  font-size: var(--font-size);
+  line-height: 1.2;
+  font-family: inherit;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: color-mix(in srgb, var(--accent-color) calc(var(--effect, 0) * 100%), var(--text-color));
+  transform: translateX(calc(var(--effect, 0) * var(--max-shift)));
+  transition: transform 0.05s ease-out;
+}
+
+.line-sidebar__index {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  margin-right: 0.6rem;
+  font-size: 0.8em;
+  opacity: calc(0.45 + var(--effect, 0) * 0.55);
+}
+
+.line-sidebar__marker {
+  position: absolute;
+  top: 50%;
+  left: calc(-1 * var(--marker-length) - var(--marker-gap));
+  height: 1px;
+  width: var(--marker-length);
+  background-color: color-mix(in srgb, var(--accent-color) calc(var(--effect, 0) * 100%), var(--marker-color));
+  transform-origin: left center;
+  transform: translateY(-50%) scaleX(calc(0.6 + var(--effect, 0) * 0.6));
+}
+
+/* Short static tick centered in the gap between two menu items */
+.line-sidebar--markers .line-sidebar__item:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: calc(100% + var(--item-gap) / 2);
+  left: calc(-1 * var(--marker-length) - var(--marker-gap));
+  height: 1px;
+  width: calc(var(--marker-length) * var(--tick-scale));
+  background-color: var(--marker-color);
+  opacity: 0.4;
+  transform: translateY(-50%);
+}
+
+/* When enabled, the in-between ticks grow with cursor proximity too */
+.line-sidebar--scale-tick .line-sidebar__item:not(:last-child)::after {
+  transform-origin: left center;
+  transform: translateY(-50%) scaleX(calc(0.6 + var(--effect, 0) * 0.6));
+}

@@ -1,29 +1,40 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Navbar from './components/Navbar';
 import HeroSection from './components/HeroSection';
-import GoogleGeminiEffectSection from './components/GoogleGeminiEffectSection';
-import ProjectsSection from './components/ProjectsSection';
+import AboutSection from './components/AboutSection';
 import LanguagesSection from './components/LanguagesSection';
-import AchievementsSection from './components/AchievementsSection';
-import GitHubStatsSection from './components/GitHubStatsSection';
-import GallerySection from './components/GallerySection';
+import ProjectsSection from './components/ProjectsSection';
 import GetInTouchSection from './components/GetInTouchSection';
 import Footer from './components/Footer';
+import TrailingCursor from './components/ui/TrailingCursor';
+import ScrollProgress from './components/ui/ScrollProgress';
+import LoadingScreen from './components/ui/LoadingScreen';
+import LikeHeartButton from './components/ui/LikeHeartButton';
+import { LanguageProvider } from './context/LanguageContext';
+import { initGlobalClickSound } from './utils/soundEffects';
 
 function App() {
+  useEffect(() => {
+    const cleanup = initGlobalClickSound();
+    return cleanup;
+  }, []);
+
   return (
-    <div className="min-h-screen bg-black">
-      <Navbar />
-      <HeroSection />
-      <GoogleGeminiEffectSection />
-      <ProjectsSection />
-      <LanguagesSection />
-      <AchievementsSection />
-      <GitHubStatsSection />
-      <GallerySection />
-      <GetInTouchSection />
-      <Footer />
-    </div>
+    <LanguageProvider>
+      <div className="min-h-screen bg-black transition-colors duration-300">
+        <LoadingScreen />
+        <ScrollProgress />
+        <TrailingCursor />
+        <Navbar />
+        <HeroSection />
+        <AboutSection />
+        <LanguagesSection />
+        <ProjectsSection />
+        <GetInTouchSection />
+        <Footer />
+        <LikeHeartButton />
+      </div>
+    </LanguageProvider>
   );
 }
 

@@ -1,5 +1,9 @@
 import React from 'react';
 import { GridBackground } from './ui/grid-background';
+import TargetCursor from './ui/TargetCursor';
+import ScrollBlurFade from './ui/ScrollBlurFade';
+import { playTechHoverSound } from '../utils/soundEffects';
+import { useLanguage } from '../context/LanguageContext';
 
 interface Language {
   name: string;
@@ -38,45 +42,88 @@ const languages: Language[] = [
 ];
 
 const LanguagesSection: React.FC = () => {
-  return (
-    <GridBackground className="min-h-screen py-20 px-4 md:px-8">
-      <div className="relative z-10 max-w-7xl mx-auto">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
-            Technologies & Languages
-          </h2>
-          <p className="text-lg text-white/70 max-w-2xl mx-auto">
-            A comprehensive toolkit spanning multiple domains of software development
-          </p>
-        </div>
+  const { t } = useLanguage();
 
-        <div className="grid grid-cols-6 md:grid-cols-9 gap-6">
-          {languages.map((language, index) => (
-            <div
-              key={index}
-              className="group flex flex-col items-center justify-center p-3 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-white/10"
-              style={{
-                animationDelay: `${index * 50}ms`,
-              }}
-            >
-              <div className="w-10 h-10 md:w-12 md:h-12 mb-2 transition-transform duration-300 group-hover:scale-110">
-                <img
-                  src={language.icon}
-                  alt={language.name}
-                  className="w-full h-full object-contain filter drop-shadow-lg"
-                  style={{
-                    filter: `drop-shadow(0 0 8px ${language.color}40)`,
-                  }}
-                />
-              </div>
-              <p className="text-xs text-white/90 font-medium text-center group-hover:text-white transition-colors">
-                {language.name}
-              </p>
+  return (
+    <section id="stack" data-no-cursor="true" className="relative border-t border-white/10 overflow-hidden bg-black text-white">
+      {/* Target Cursor Component for Interactive Exploration */}
+      <TargetCursor
+        targetSelector=".cursor-target"
+        spinDuration={2}
+        hoverDuration={0.2}
+        parallaxOn={true}
+        cursorColor="#ffffff"
+        cursorColorOnTarget="#ffffff"
+        scopeSelector="#stack"
+      />
+
+      <GridBackground className="min-h-screen py-24 md:py-32 px-4 md:px-8">
+        <div className="relative z-10 max-w-7xl mx-auto w-full">
+          
+          {/* Section Header Heading: Animated Blur Fade-In */}
+          <ScrollBlurFade direction="up" distance={30} blur={10}>
+            <div className="flex items-center gap-3 sm:gap-4 mb-10 md:mb-12">
+              <span className="w-2.5 h-2.5 bg-white rounded-full animate-pulse shadow-[0_0_8px_rgba(255,255,255,0.9)]" />
+              <h2 className="font-display text-3xl sm:text-4xl xl:text-5xl font-extrabold tracking-tight text-white leading-none">
+                {t.stack.heading}
+              </h2>
+              <span className="h-px bg-white/10 flex-1 ml-4" />
             </div>
-          ))}
+          </ScrollBlurFade>
+
+          {/* Subheading & Scope metadata */}
+          <ScrollBlurFade direction="up" distance={30} delay={0.1}>
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 sm:mb-16">
+              <div className="space-y-3 max-w-2xl">
+                <h3 className="font-display text-xl sm:text-2xl md:text-3xl font-bold tracking-tight text-white leading-snug">
+                  {t.stack.subheading}
+                </h3>
+                <p className="font-mono-tech text-xs sm:text-sm text-neutral-400 leading-relaxed">
+                  {t.stack.description}
+                </p>
+              </div>
+
+              {/* Interactive Cursor Indicator Badge */}
+              <div className="cursor-target inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/15 text-[11px] font-mono-tech text-neutral-300 tracking-wider backdrop-blur-sm w-fit transition-colors hover:bg-white/10">
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75" />
+                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-white shadow-[0_0_6px_rgba(255,255,255,0.8)]" />
+                </span>
+                <span className="uppercase">{t.stack.targetHint}</span>
+              </div>
+            </div>
+          </ScrollBlurFade>
+
+          {/* Technology Cards Grid with Staggered Scroll Blur-Fade */}
+          <ScrollBlurFade direction="up" distance={35} delay={0.2}>
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-9 gap-3 sm:gap-4 md:gap-5">
+              {languages.map((language, index) => (
+                <div
+                  key={index}
+                  onMouseEnter={() => playTechHoverSound()}
+                  className="cursor-target group relative flex flex-col items-center justify-center p-3.5 sm:p-4 rounded-xl bg-white/[0.03] backdrop-blur-sm border border-white/10 hover:bg-white/[0.08] hover:border-white/30 transition-all duration-300 hover:scale-105 hover:shadow-[0_0_20px_rgba(255,255,255,0.08)] select-none cursor-pointer"
+                >
+                  <div className="w-10 h-10 md:w-11 md:h-11 mb-2.5 transition-transform duration-300 group-hover:scale-110 flex items-center justify-center">
+                    <img
+                      src={language.icon}
+                      alt={language.name}
+                      className="w-full h-full object-contain filter drop-shadow-md transition-all duration-300 group-hover:brightness-110"
+                      style={{
+                        filter: `drop-shadow(0 0 10px ${language.color}40)`,
+                      }}
+                    />
+                  </div>
+                  <p className="font-mono-tech text-[11px] sm:text-xs text-neutral-300 font-medium text-center group-hover:text-white transition-colors truncate w-full px-1">
+                    {language.name}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </ScrollBlurFade>
+
         </div>
-      </div>
-    </GridBackground>
+      </GridBackground>
+    </section>
   );
 };
 
